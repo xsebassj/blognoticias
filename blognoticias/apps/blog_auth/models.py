@@ -12,9 +12,9 @@ def get_avatar_filename(instance, filename):
      
 # Create your models here.
 
-class user(AbstractUser):
+class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    nombre_usuario = models.CharField(max_length=20, blank=False,null=False)
+    username = models.CharField(max_length=20, unique=True) 
     avatar = models.ImageField(upload_to=get_avatar_filename, default='usuario/default/avatar_default.jpg')
     email = models.EmailField()
     
@@ -25,10 +25,10 @@ class user(AbstractUser):
 
 @property
 def is_collaborator(self):
-   return self.groups.filter(name='collaborators').exist()
+   return self.groups.filter(name='collaborators').exists()
 @property
 def is_registered(self):
-   return self.groups.filter(name='registered').exist()
+   return self.groups.filter(name='registered').exists()
 @property
 def is_admin(self):
-   return self.groups.filter(name='admins').exist()
+   return self.groups.filter(name='admins').exists()

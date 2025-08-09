@@ -3,7 +3,7 @@ from django.contrib.contenttypes.models import ContentType
 from apps.blog_auth.models import user
 from django.dispatch import receiver
 from django.db.models.signals import post_save
-
+from apps.noticias.models import Post,Comment
 @receiver(post_save, sender= user)
 def create_groups_and_permissions(sender,instance,created, **kwargs):
     if created and instance.is_superuser:
@@ -62,6 +62,11 @@ def create_groups_and_permissions(sender,instance,created, **kwargs):
                  change_comment_permission,  
                  delete_comment_permission,
             )
+            print("Grupos y Permisos creados exitosamente.")
+        except ContentType.DoesNotExist:
+            print("El tipo aun no se encuentra disponible.")
+        except Permission.DoesNotExist:
+            print("Uno o mas permisos no se encuentran disponibles")
 
 
             
@@ -71,5 +76,4 @@ def create_groups_and_permissions(sender,instance,created, **kwargs):
 
 
 
-        except :     
-            pass  
+       

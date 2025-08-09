@@ -6,7 +6,11 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'blognoticias',
+        'USER': 'bloguser',
+        'PASSWORD': 'sebas312',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
