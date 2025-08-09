@@ -16,7 +16,7 @@ class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     username = models.CharField(max_length=20, unique=True) 
     avatar = models.ImageField(upload_to=get_avatar_filename, default='usuario/default/avatar_default.jpg')
-    email = models.EmailField()
+    email = models.EmailField(unique=True)
     
     
     def __str__(self):

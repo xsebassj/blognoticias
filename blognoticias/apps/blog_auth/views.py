@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from .forms import SingUpForm
 from django.contrib.auth import authenticate, login 
 from django.contrib import messages
+from django.contrib.auth import logout
 # Create your views here.
 
 def Register_view(request):
@@ -26,3 +27,7 @@ def Login_view(request):
         else :
             messages.error(request, 'credenciales incorrectas')
     return render(request, 'blog_auth/login.html')
+
+def logout_view(request):
+    logout(request)  
+    return redirect('apps.blog_auth:login')
