@@ -12,7 +12,7 @@ def Register_view(request):
             return redirect("apps.blog_auth:login")
     else:
         form = SingUpForm()
-    return render(request, "templates/blog_auth/register.html", {"form" : form}) 
+    return render(request, "blog_auth/register.html", {"form" : form}) 
 
 
 def Login_view(request):
