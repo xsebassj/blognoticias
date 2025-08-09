@@ -31,7 +31,7 @@ class Post(models.Model):
             self.slug =self.generate_unique_slug()
             super().save(*args, **kwargs)
         if not self.images.exists():
-            PostImage.objects.created(post=self, image='noticias/default/post_default.png')
+            PostImage.objects.create(post=self, image='noticias/default/post_default.png')
     
 
     def generate_unique_slug(self):
