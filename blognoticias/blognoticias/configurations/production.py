@@ -4,9 +4,15 @@ DEBUG = False
 ALLOWED_HOSTS = ['xsebasssj.pythonanywhere.com']
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'blognoticias_db',
+        'USER': 'sebas',
+        'PASSWORD': 'tu_contraseña_segura',
+        'HOST': 'localhost',
+        'PORT': '3306',
     }
+}
+
 }
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
