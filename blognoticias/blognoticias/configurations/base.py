@@ -28,7 +28,7 @@ SECRET_KEY = os.getenv('default')
 
 
 
-SECRET_KEY = config('DJANGO_SECRET_KEY')
+SECRET_KEY = ´default'
 
 
 
