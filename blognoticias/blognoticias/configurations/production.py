@@ -8,7 +8,8 @@ DATABASES = {
         'NAME': 'blognoticias_db',
         'USER': 'sebas',
         'PASSWORD': 'tu_contraseña_segura',
-        'HOST': 'localhost',
+        'HOST': 'DB_HOST=xsebasssj.mysql.pythonanywhere-services.com
+',
         'PORT': '3306',
     }
 }
