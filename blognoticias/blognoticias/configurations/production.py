@@ -1,16 +1,7 @@
 from .base import * 
 
-DEBUG = False
+DEBUG = os.getenv('DJANGO_DEBUG')
 
-ALLOWED_HOSTS = ['production.com']
+ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS')
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'blognoticias',
-        'USER': 'bloguser',
-        'PASSWORD': 'sebas312',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
+DATABASES = os.getenv('DJANGO_DATABASE')
