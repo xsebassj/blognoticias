@@ -1,8 +1,30 @@
+# Entornos virtuales
+env/
+venv/
+
+# Archivos de entorno
 .env
-.env
-__pycache__
+*.env
+
+# Archivos de base de datos
 db.sqlite3
-.vscode
-blognoticias/media/**/*
-blognoticias/media/**/*
-staticfiles
+
+# Cachés de Python
+__pycache__/
+*.py[cod]
+
+# Configuración de VSCode
+.vscode/
+
+# Archivos estáticos recolectados
+staticfiles/
+
+# Archivos media subidos por usuarios
+blognoticias/media/
+
+# Archivos de migraciones (opcional si querés ignorarlos)
+**/migrations/*.py
+**/migrations/__pycache__/
+
+# Archivos de logs (si usás alguno)
+*.log
