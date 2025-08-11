@@ -1,0 +1,82 @@
+{% extends "base_layout.html" %}
+{% block title %}Sobre el sitio{% endblock %}
+
+{% block contenido %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <!-- Sección informativa -->
+      <div class="text-center mb-4">
+        <h1 class="display-5 text-warning">Sobre Punto Tecnologico</h1>
+        <p class="lead text-light">Tu fuente confiable de noticias, análisis y opinión.</p>
+      </div>
+
+      <div class="card bg-dark text-light shadow-sm mb-5 border-0">
+        <div class="card-body">
+          <h4 class="text-warning">🤔¿Qué es Punto Tecnologico?</h4>
+          <p>Punto Tecnologico es una plataforma desarrollada con Django que permite publicar, editar y compartir contenido informativo de manera colaborativa...</p>
+
+          <h4 class="text-warning">💭¿Quién lo creó?</h4>
+          <p>Este sitio fue creado por Sebastian Samper, Un estudiante de desarrolo web del Informatorio del Gobierno del chaco...</p>
+
+          <h4 class="text-warning">🚀 ¿Qué ofrece Punto Tecnológico?</h4>
+          <ul>
+            <li>Punto Tecnológico no es solo una app: es tu nuevo centro digital para descubrir, compartir y potenciar el mundo tech. Desde noticias actualizadas 
+                hasta herramientas que te simplifican la vida, todo está diseñado para que vos estés un paso adelante.
+            </li>
+            <li>🔧 Soluciones reales: Encontrá productos, servicios y soporte técnico sin vueltas.</li>
+            <li> 📰 Contenido inteligente: Noticias, reseñas y tendencias que sí importan.</li>
+            <li>💬 Comunidad activa: Opiná, comentá y conectate con otros apasionados por la tecnología.</li>
+            <li>📱 Diseño intuitivo: Navegá fácil, rápido y sin perder tiempo.</li>
+            <li>🎯 Todo en un solo lugar: Desde lo último en hardware hasta tips de productividad.</li>
+          </ul>
+
+          <h4 class="text-warning">✨ ¿Por qué usarla?</h4>
+          <li>Porque en Punto Tecnológico no perdés tiempo: ganás soluciones.</li>
+          <li> Porque no solo te informás: te conectás.</li>
+          <li> Porque no es solo tecnología: es tu punto de partida.</li>
+        </div>
+      </div>
+
+      <!-- Formulario de contacto -->
+      <div class="card bg-dark text-light shadow-sm border-0">
+        <div class="card-body">
+          <h4 class="mb-3 text-warning">📬 ¿Querés contactarte?</h4>
+
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+
+          <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="nombre" class="form-label text-warning">Nombre</label>
+              <input type="text" name="nombre" id="nombre" class="form-control bg-dark text-light border-light" required>
+            </div>
+            <div class="mb-3">
+              <label for="email" class="form-label text-warning">Correo electrónico</label>
+              <input type="email" name="email" id="email" class="form-control bg-dark text-light border-light" required>
+            </div>
+            <div class="mb-3">
+              <label for="mensaje" class="form-label text-warning">Mensaje</label>
+              <textarea name="mensaje" id="mensaje" rows="4" class="form-control bg-dark text-light border-light" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-success w-100">
+              <i class="bi bi-send"></i> Enviar mensaje
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div class="text-center mt-4">
+        <a href="{% url 'inicio' %}" class="btn btn-outline-warning">Volver al inicio</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

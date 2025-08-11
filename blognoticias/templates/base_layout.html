@@ -1,0 +1,164 @@
+{% load static %}
+<!doctype html>
+<html lang="es-ar">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <title>{% block title %}Punto Tecnológico{% endblock %}</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr"
+        crossorigin="anonymous"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+  <style>
+    body {
+      background-color: #121212;
+      color: #f1f1f1;
+    }
+    .card {
+      background-color: #1e1e1e;
+      border: none;
+    }
+    .navbar, footer {
+      background-color: #1c1c1c;
+    }
+    .nav-link, .dropdown-item {
+      color: #f1f1f1 !important;
+    }
+    .nav-link.active {
+      font-weight: bold;
+      color: #ffc107 !important;
+    }
+    .form-control, .btn {
+      border-radius: 0.3rem;
+    }
+    .btn-outline-success {
+      color: #ffc107;
+      border-color: #ffc107;
+    }
+    .btn-outline-success:hover {
+      background-color: #ffc107;
+      color: #121212;
+    }
+    .alert {
+      margin-bottom: 0;
+    }
+
+    /* Avatar del usuario */
+    .navbar img.avatar {
+      width: 32px;
+      height: 32px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 1px solid #f1f1f1;
+      transition: box-shadow 0.3s ease;
+    }
+    .navbar img.avatar:hover {
+      box-shadow: 0 0 5px #ffc107;
+    }
+
+    /* Logo redondo y grande */
+    .navbar-brand img.logo {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 2px solid #ffc107;
+      box-shadow: 0 0 8px rgba(255, 193, 7, 0.4);
+      transition: transform 0.3s ease;
+    }
+    .navbar-brand img.logo:hover {
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show text-center" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Navbar -->
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'inicio' %}">
+          <img src="{% static 'assets/pt.png' %}" alt="Logo" class="logo">
+          <span class="fw-bold text-warning fs-5">Punto Tecnológico</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto align-items-center">
+            <li class="nav-item">
+              <a class="nav-link {% if request.path == '/inicio/' %}active{% endif %}" href="{% url 'inicio' %}">Inicio</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if 'posts' in request.path %}active{% endif %}" href="/posts/">Publicaciones</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">About Me</a>
+            </li>
+            <form class="d-flex ms-3" role="search" method="get" action="{% url 'noticias:search' %}">
+              <input class="form-control me-2 bg-dark text-light border-light" type="search" name="q" placeholder="Buscar publicaciones" aria-label="Buscar">
+              <button class="btn btn-outline-success" type="submit">Buscar</button>
+            </form>
+
+            {% if not request.user.is_authenticated %}
+              <li class="nav-item ms-3">
+                <a class="nav-link {% if request.path == '/login/' %}active{% endif %}" href="/login/">Login</a>
+              </li>
+            {% else %}
+              <li class="nav-item dropdown ms-3">
+                <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown">
+                  {% if request.user.avatar %}
+                    <img src="{{ request.user.avatar.url }}" alt="Avatar" class="avatar">
+                  {% else %}
+                    <img src="{% static 'assets/default_avatar.jpg' %}" alt="Avatar por defecto" class="avatar">
+                  {% endif %}
+                  <span>{{ request.user.username }}</span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
+                  <li><a class="dropdown-item" href="/perfil/">Perfil</a></li>
+                  <li><a class="dropdown-item" href="/logout/">Cerrar sesión</a></li>
+                </ul>
+              </li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Contenido principal -->
+  <main class="flex-grow-1 py-3">
+    <div class="container px-3">
+      {% block contenido %}{% endblock %}
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="text-center text-light py-2 mt-auto">
+    &copy; 2025 Punto Tecnológico. Todos los derechos reservados.
+  </footer>
+
+  <!-- Scripts Bootstrap -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+          integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+          crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+          integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
+          crossorigin="anonymous"></script>
+</body>
+</html>
+

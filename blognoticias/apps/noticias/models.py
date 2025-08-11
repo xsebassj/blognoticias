@@ -3,12 +3,20 @@ import uuid, os
 from django.conf import settings
 from django.utils import timezone
 from django.utils.text import slugify
-
+from django.core.files import File
+from pathlib import Path
+from django.urls import reverse
 class Category(models.Model):
-    titulo = models.CharField(max_length=50)
+    titulo = models.CharField(max_length=50, unique=True)
+    slug = models.SlugField(max_length=60, unique=True, blank=True)
 
     def __str__(self):
         return self.titulo
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.titulo)
+        super().save(*args, **kwargs)
 class Post(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL,null=True, related_name= 'post')
@@ -27,12 +35,23 @@ class Post(models.Model):
         return self.comments.count()
    
     def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug =self.generate_unique_slug()
-            super().save(*args, **kwargs)
-        if not self.images.exists():
-            PostImage.objects.create(post=self, image='noticias/default/post_default.png')
-    
+      if not self.slug:
+        self.slug = self.generate_unique_slug()
+
+      is_new = self._state.adding
+      super().save(*args, **kwargs)
+
+      if is_new and not self.images.exists():
+        default_path = Path(settings.MEDIA_ROOT) / 'noticias/default/post_default.png'
+        if default_path.exists():
+            with open(default_path, 'rb') as f:
+                PostImage.objects.create(post=self, image=File(f))
+        else:
+            print(f"⚠️ Imagen por defecto no encontrada en: {default_path}")
+
+
+    def get_absolute_url(self):
+        return reverse("noticias:post_detail", kwargs={"slug": self.slug})
 
     def generate_unique_slug(self):
         slug = slugify(self.titulo)
@@ -41,6 +60,10 @@ class Post(models.Model):
         while Post.objects.filter(slug=unique_slug).exists():
             unique_slug= f'{slug}-{num}'
             num +=1
+        return unique_slug
+    @property
+    def amount_images(self):
+        return self.images.count()
    
 
 
@@ -55,38 +78,40 @@ class Comment(models.Model):
 
 
     def __str__(self):
-        return self.titulo
+        return f'Comentario de {self.autor} en {self.post.titulo}'
     
    
 
-class like(models.Model):
-       autor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name= 'likes')
-       noticia  = models.ForeignKey(Post, on_delete=models.CASCADE)
-       fecha = models.DateTimeField(default=timezone.now)
+class Like(models.Model):
+    autor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='likes')
+    noticia = models.ForeignKey(Post, on_delete=models.CASCADE)
+    fecha = models.DateTimeField(default=timezone.now)
 
-       class meta():
-           unique_together= ('noticia', 'autor')
-        
-       def __str__(self):
-         return f'{self.autor} le dio like a {self.noticia.titulo}'
+    class Meta:
+        unique_together = ('noticia', 'autor')
+
+    def __str__(self):
+        return f'{self.autor} le dio like a {self.noticia.titulo}'
+    def get_context_data(self, **kwargs):
+     context = super().get_context_data(**kwargs)
+     context["liked_by_user"] = self.object.like_set.filter(autor=self.request.user).exists()
+     context["likes_count"] = self.object.like_set.count()
+     return context
     
 def get_image_filename(instance, filename):
-    post_id = instance.post.id
-    image_count = instance.post.images.count()
-    base_filemame , file_extension = os.path.splitext(filename)
-    new_filename = f'pos_{post_id}_image{image_count + 1}{file_extension}'
+    post_id = instance.post.id if instance.post else 'unknown'
+    unique_id = uuid.uuid4().hex[:8]
+    base_filename, file_extension = os.path.splitext(filename)
+    new_filename = f'pos_{post_id}_{unique_id}{file_extension}'
+    return os.path.join('noticias/cover/', new_filename) 
 
-    return os.path.join('noticias/cover/',new_filename)
 
-@property
-def amount_images(self):
-    return self.images.count()
 class PostImage(models.Model):
     post=models.ForeignKey(Post, on_delete=models.CASCADE, related_name= 'images')
     image = models.ImageField(upload_to=get_image_filename)
     active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
 
-    def __str__(self):
-        return f'PostImage {self.id}'
-    
+   
+   
+   

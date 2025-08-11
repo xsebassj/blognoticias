@@ -1,0 +1,31 @@
+<form method="get" class="row g-2 mb-4">
+    <div class="col-md-5">
+      <select name="categoria" class="form-select">
+        <option value="">Todas las categorías</option>
+        {% for cat in categorias %}
+          <option value="{{ cat.pk }}" {% if request.GET.categoria == cat.pk|stringformat:"s" %}selected{% endif %}>
+            {{ cat.titulo }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+  
+    <div class="col-md-5">
+      <select name="orden" class="form-select">
+        <option value="reciente" {% if request.GET.orden == "reciente" %}selected{% endif %}>Más recientes</option>
+        <option value="antiguo" {% if request.GET.orden == "antiguo" %}selected{% endif %}>Más antiguos</option>
+      </select>
+    </div>
+  
+    <div class="col-md-2 d-flex align-items-end">
+      <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+    </div>
+  </form>
+  <p>Total categorías: {{ categorias|length }}</p>
+<ul>
+  {% for cat in categorias %}
+    <li>{{ cat.titulo }}</li>
+  {% empty %}
+    <li>No hay categorías disponibles.</li>
+  {% endfor %}
+</ul>

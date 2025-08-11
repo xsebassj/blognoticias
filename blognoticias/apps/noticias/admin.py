@@ -1,5 +1,5 @@
 from django.contrib import admin
-from apps.noticias.models import Category,Post,PostImage,Comment,like
+from apps.noticias.models import Category,Post,PostImage,Comment,Like
 
 
 # Register your models here.
@@ -53,5 +53,5 @@ class PostImageAdmin(admin.ModelAdmin):
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Post, PostAdmin)
 admin.site.register(Comment, CommentAdmin)
-admin.site.register(like, LikeAdmin)
+admin.site.register(Like, LikeAdmin)
 admin.site.register(PostImage, PostImageAdmin)

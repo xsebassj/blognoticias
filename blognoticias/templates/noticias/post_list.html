@@ -1,58 +1,72 @@
-{% extends 'layouts/post_layout.html' %}
+{% extends 'base_layout.html' %}
+{% load static %}
+{% block title %}Publicaciones{% endblock %}
 
-{% block title %}Post | BLOG IA{% endblock title %}
+{% block contenido %}
+<div class="container-fluid px-3">
+  <h2 class="text-warning mb-3">📰 Publicaciones recientes</h2>
+  <p class="text-light small mb-4">Total de publicaciones: {{ posts|length }}</p>
 
-{% block content %}
-  <form method="get" class="flex flex-wrap sm:flex-nowrap gap-4 mb-6">
-    <div class="w-full">
-      {{ filter_form.search_query }}
+  <!-- Filtro -->
+  <form method="get" class="row g-2 mb-4">
+    <div class="col-md-5">
+      <select name="categoria" class="form-select bg-dark text-light border-light">
+        <option value="">Todas las categorías</option>
+        {% for cat in categorias %}
+          <option value="{{ cat.pk }}" {% if request.GET.categoria == cat.pk|stringformat:"s" %}selected{% endif %}>
+            {{ cat.titulo }}
+          </option>
+        {% endfor %}
+      </select>
     </div>
-    <div class="w-full sm:w-[380px]">
-      {{ filter_form.order_by }}
+    <div class="col-md-5">
+      <select name="orden" class="form-select bg-dark text-light border-light">
+        <option value="reciente" {% if request.GET.orden == "reciente" %}selected{% endif %}>Más recientes</option>
+        <option value="antiguo" {% if request.GET.orden == "antiguo" %}selected{% endif %}>Más antiguos</option>
+      </select>
     </div>
-    <button type="submit" class="w-full sm:w-[280px] bg-blue-500 text-white p-2 rounded-lg">Buscar</button>
+    <div class="col-md-2 d-flex align-items-end">
+      <button type="submit" class="btn btn-outline-warning w-100">Filtrar</button>
+    </div>
   </form>
 
-  <div class="grid grid-cols-1 gap-6">
-    {% for post in object_list %}
-      <div class="bg-gray-800 text-white rounded-2xl p-6">
-        <h3 class="text-2xl uppercase font-bold">{{ post.title }}</h3>
-        <p>{{ post.content }}</p>
-        <p>Publicado por: <strong class="font-bold">{{ post.author.username }}</strong></p>
-        <p>Fecha de publicación: {{ post.created_at }}</p>
-        <p>Comentarios permitidos: {{ post.allow_comments|yesno:"Si,No" }}</p>
-        <p>Comentarios: {{ post.amount_comments }}</p>
-        <div class="flex gap-2 mt-8">
-          <a 
-            class="bg-red-500 text-white p-2 rounded-lg" 
-            href="{% url 'post:post_detail' slug=post.slug %}"
-          >Ver post</a>
-          <a 
-            class="bg-red-500 text-white p-2 rounded-lg" 
-            href="{% url 'post:post_delete' slug=post.slug %}"
-          >Eliminar post</a>
-        </div>
-      </div>
+  <p class="text-light small">Total categorías: {{ categorias|length }}</p>
+
+  {% if request.user.is_authenticated %}
+    <div class="mb-4 text-end">
+      <a href="http://127.0.0.1:8000/create/" class="btn btn-success btn-sm text-dark">
+        <i class="bi bi-plus-circle"></i> Crear nueva publicación
+      </a>
+    </div>
+  {% endif %}
+
+  <!-- Publicaciones -->
+  <div class="row">
+    {% for post in posts %}
+      {% include 'noticias/post_target.html' with post=post %}
+    {% empty %}
+      <div class="alert alert-warning col-12 text-center">No hay publicaciones disponibles.</div>
     {% endfor %}
   </div>
 
-  <div class="mt-4">
-    {% if is_paginated %}
-      <div class="flex justify-center items-center gap-2">
+  <!-- Paginación -->
+  {% if pagination %}
+    <nav aria-label="Page navigation" class="mt-4">
+      <ul class="pagination justify-content-center">
+        {% if pagination.first_page %}
+          <li class="page-item"><a class="page-link" href="{{ pagination.first_page }}">Primera</a></li>
+        {% endif %}
         {% if pagination.previous_page %}
-          <a href="{{ pagination.previous_page }}" class="w-16 text-xs text-center bg-blue-500 text-white p-1 rounded-md">Anterior</a>
-        {% else %}
-          <span class="w-16 text-xs text-center bg-gray-500 text-white p-1 rounded-md">Anterior</span>
+          <li class="page-item"><a class="page-link" href="{{ pagination.previous_page }}">Anterior</a></li>
         {% endif %}
-
-        <span class="w-10 text-center text-lg font-semibold">{{ page_obj.number }}</span>
-
         {% if pagination.next_page %}
-          <a href="{{ pagination.next_page }}" class="w-16 text-xs text-center bg-blue-500 text-white p-1 rounded-md">Siguiente</a>
-        {% else %}
-          <span class="w-16 text-xs text-center bg-gray-500 text-white p-1 rounded-md">Siguiente</span>
+          <li class="page-item"><a class="page-link" href="{{ pagination.next_page }}">Siguiente</a></li>
         {% endif %}
-      </div>
-    {% endif %}
-  </div>
-{% endblock content %}
+        {% if pagination.last_page %}
+          <li class="page-item"><a class="page-link" href="{{ pagination.last_page }}">Última</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,91 +1,118 @@
-{% extends 'layouts/post_layout.html' %}
+{% extends "base_layout.html" %}
+{% load widget_tweaks %}
+{% block title %}{{ post.titulo }}{% endblock %}
 
-{% block title %} Post {% endblock title %}
+{% block contenido %}
+<div class="container py-4">
+  <style>
+    textarea.form-control {
+      background-color: #1e1e1e !important;
+      color: #f8f9fa !important;
+      border-color: #6c757d !important;
+      box-shadow: none !important;
+    }
+    textarea.form-control::placeholder {
+      color: #adb5bd;
+    }
+    textarea.form-control:focus {
+      background-color: #1e1e1e !important;
+      color: #f8f9fa !important;
+      border-color: #0d6efd !important;
+      box-shadow: none !important;
+    }
+  </style>
 
+  <div class="card bg-dark text-light p-4 rounded-4 shadow-sm">
+    
+    <h2 class="mb-1 ">{{ post.titulo }}</h2>
+    <p class="text-white mb-3">Publicado por <strong> 👤{{ post.autor.username }}&nbsp; | &nbsp; </strong> el 🕒 {{ post.created_at|date:"d M Y H:i" }}</p>
 
-{% block content %}
+    {% if has_images %}
+      <div class="mb-4 d-flex flex-wrap gap-3">
+        {% for image in active_images %}
+          <img src="{{ image.image.url }}" class="img-thumbnail" style="max-width: 250px;" alt="Imagen del post">
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-muted">Este post no tiene imágenes.</p>
+    {% endif %}
 
-{% if active_images %}
-  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-    {% for image in active_images %}
-    <a href="{{ image.image.url }}" target="_blank">
-      <img 
-        src="{{ image.image.url }}"
-        alt="Portada del post {{ image.id }}"
-        class="w-[400px] object-cover aspect-[16/9]">
-    </a>
-    {% endfor %}
-  </div>
-{% endif %}
+    <p class="mb-4">{{ post.contenido }}</p>
 
-<h3 class="text-2xl uppercase font-bold">{{ post.title }}</h3>
+    {% if request.user == object.autor %}
+      <div class="mb-3">
+        <a href="{% url 'noticias:post_update' slug=object.slug %}" class="btn btn-outline-primary me-2">
+          ✏️ Editar
+        </a>
+        <a href="{% url 'noticias:post_delete' slug=object.slug %}" class="btn btn-outline-danger">
+          🗑️ Eliminar
+        </a>
+      </div>
+    {% endif %}
 
-<p>{{ post.content }}</p>
-<p>Publicado por: <strong class="font-bold">{{ post.author.username }}</strong></p>
-<p>Fecha de publicación: {{ post.created_at }}</p>
-<p>Comentarios permitidos: {{ post.allow_comments|yesno:"Si,No" }}</p>
+    {% if object.update_at and object.update_at != object.created_at %}
+      <span class="badge bg-info text-dark mb-3">
+        ✏️ Editado hace {{ object.update_at|timesince }}
+      </span>
+    {% endif %}
 
-<div class="flex mt-8 gap-4">
-  <a
-    class="bg-blue-500 text-white p-2 rounded-lg"
-    href="{% url 'post:post_update' slug=post.slug %}"
-  >Editar post</a>
-  <a
-    class="bg-red-500 text-white p-2 rounded-lg"
-    href="{% url 'post:post_delete' slug=post.slug %}"
-  >Eliminar post</a>
-</div>
-
-
-<h4 class="mt-8 mb-4">Comentarios</h4>
-{% if post.comments.count %}
-  <ul>
-    {% for comment in post.comments.all %}
-      {% if comment.id == editing_comment_id %}
-        <form method="post" action="{% url 'post:comment_update' comment.id %}" class="mb-8">
-          {% csrf_token %}
-          <p class="flex flex-col mt-4">{{ edit_comment_form.content.label_tag }} {{ edit_comment_form.content }}</p>
-          <button type="submit" class="text-blue-500">Actualizar</button>
-          <a href="{% url 'post:post_detail' post.slug %}" class="text-red-500">Cancelar</a>
-        </form>
-      {% elif comment.id == deleting_comment_id %}
-        <form method="post" action="{% url 'post:comment_delete' comment.id %}" class="mb-8">
-          {% csrf_token %}
-          <p class="flex flex-col mt-4">¿Estás seguro de que desas eliminar este comentario?</p>
-          <button type="submit" class="text-blue-500">Confirmar</button>
-          <a href="{% url 'post:post_detail' post.slug %}" class="text-red-500">Cancelar</a>
-        </form>
-      {% else %}
-        <li class="mb-8">
-          <p>{{ comment.content }}</p>
-          <small>Escrito por {{ comment.author.username }} el {{ comment.created_at }}</small>
-          
-          {% if comment.author == user %}
-            <a href="?edit_comment={{ comment.id }}" class="text-blue-500">Editar</a>
-            <a href="?delete_comment={{ comment.id }}" class="text-red-500">Eliminar</a>
-          {% elif user.is_collaborator and post.author == user and not comment.author.is_admin and not comment.author.is_superuser or user.is_admin or user.is_superuser or user.is_staff %}
-            <a href="?delete_comment={{ comment.id }}" class="text-red-500">Eliminar</a>
+    <form method="post" action="{% url 'noticias:like' slug=post.slug %}" class="mt-2">
+      {% csrf_token %}
+      {% if user.is_authenticated %}
+        <button type="submit" class="btn btn-sm p-0 border-0 bg-transparent">
+          {% if liked_by_user %}
+            <i class="bi bi-heart-fill text-danger fs-4"></i>
+          {% else %}
+            <i class="bi bi-heart text-secondary fs-4"></i>
           {% endif %}
-        </li>
+        </button>
+      {% else %}
+        <a href="{% url 'login' %}" class="text-decoration-none text-primary">Iniciá sesión para dar like</a>
       {% endif %}
+    </form>
+    <p class="small text-light mt-1">{{ likes_count }} me gusta</p>
+
+    <hr class="border-light">
+
+    <h4 class="mb-3">Comentarios</h4>
+    {% for comment in post.comments.all %}
+      <div class="border border-secondary rounded p-3 mb-3 bg-dark text-light">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <strong>{{ comment.autor.username }}</strong>
+            <span class="text-light small ms-2">
+                🕒 {{ comment.created_at|date:"d M Y H:i" }}
+              </span>
+          </div>
+          {% if comment.autor == request.user %}
+            <div>
+              <a href="{% url 'noticias:comment_update' comment.pk %}" class="btn btn-sm btn-outline-secondary me-1">Editar</a>
+              <a href="{% url 'noticias:comment_delete' comment.pk %}" class="btn btn-sm btn-outline-danger">Borrar</a>
+            </div>
+          {% endif %}
+        </div>
+        <p class="mt-2 mb-0">{{ comment.contenido }}</p>
+      </div>
+    {% empty %}
+      <p class="text-muted">No hay comentarios aún.</p>
     {% endfor %}
-  </ul>
-{% endif %}
+    <h5 class="mt-4">Agregar comentario</h5>
+    <form method="post" action="{% url 'noticias:comment' slug=post.slug %}" class="mt-3">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label for="id_contenido" class="form-label">Tu comentario</label>
+        {% render_field comment_form.contenido class="form-control border-secondary" placeholder="Escribí tu comentario..." style="resize:none;" %}
+        {% if comment_form.contenido.errors %}
+          <div class="text-danger small mt-1">
+            {{ comment_form.contenido.errors|striptags }}
+          </div>
+        {% endif %}
+      </div>
+      <button type="submit" class="btn btn-primary">
+        <i class="bi bi-send-fill"></i> Comentar
+      </button>
+    </form>
 
-{% if user.is_authenticated %}
-  <h4>Agregar un comentario</h4>
-  <form method="post" action="{% url 'post:comment_create' post.slug %}">
-    {% csrf_token %}
-    <p class="flex flex-col mt-4 mb-8">{{ add_comment_form.content.label_tag }} {{ add_comment_form.content }}</p>
-    <button type="submit" class="bg-blue-500 text-white p-2 rounded-lg">Agregar comentario</button>
-  </form>
-{% else %}
-  <p>
-    <a href="{% url 'user:auth_login' %}?next={{ request.path }}" class="hover:text-blue-500">Inicia sesión</a>
-    para agregar un comentario.
-  </p>
-{% endif %}
-
-{% endblock content %}
-  
-  
+  </div>
+</div>
+{% endblock %}

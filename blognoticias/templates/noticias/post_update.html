@@ -1,0 +1,113 @@
+{% extends "base_layout.html" %}
+{% load form_tags %}
+{% load widget_tweaks %}
+
+{% block title %}Editar publicación{% endblock %}
+
+{% block contenido %}
+<div class="container">
+  <div class="card bg-dark text-light shadow-lg p-4 rounded-4 mt-4">
+    <h2 class="text-warning mb-4"><i class="bi bi-pencil-square"></i> Editar publicación</h2>
+
+    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+          {{ form.non_field_errors }}
+        </div>
+      {% endif %}
+
+      <div class="mb-3">
+        <label for="id_titulo" class="form-label text-warning">Título</label>
+        {{ form.titulo|add_class:"form-control bg-dark text-light border-light" }}
+        {% if form.titulo.errors %}
+          <div class="invalid-feedback d-block">
+            {{ form.titulo.errors|striptags }}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="mb-3">
+        <label for="id_contenido" class="form-label text-warning">Contenido</label>
+        {{ form.contenido|add_class:"form-control bg-dark text-light border-light" }}
+        {% if form.contenido.errors %}
+          <div class="invalid-feedback d-block">
+            {{ form.contenido.errors|striptags }}
+          </div>
+        {% endif %}
+      </div>
+
+      {% if form.imagen_destacada %}
+        <div class="mb-3">
+          <label for="id_imagen_destacada" class="form-label text-warning">Imagen destacada</label>
+          {{ form.imagen_destacada|add_class:"form-control bg-dark text-light border-light" }}
+          {% if form.imagen_destacada.errors %}
+            <div class="invalid-feedback d-block">
+              {{ form.imagen_destacada.errors|striptags }}
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      <h5 class="text-warning mt-4"><i class="bi bi-images"></i> Imágenes adicionales</h5>
+
+      {{ image_formset.management_form }}
+
+      {% if image_formset.non_form_errors %}
+        <div class="alert alert-danger">
+          <strong>⚠️ Error en las imágenes:</strong>
+          {{ image_formset.non_form_errors }}
+        </div>
+      {% endif %}
+
+      {% for image_form in image_formset %}
+        {{ image_form.id }}
+        <div class="mb-3 bg-dark text-light border border-secondary rounded-4 p-3 shadow-sm">
+          
+          <div class="mb-2">
+            {{ image_form.image.label_tag }}
+            {{ image_form.image|add_class:"form-control bg-dark text-light border-light" }}
+            {% if image_form.image.errors %}
+              <div class="invalid-feedback d-block">
+                {{ image_form.image.errors|striptags }}
+              </div>
+            {% endif %}
+          </div>
+
+          {% if image_form.instance.image %}
+            <div class="mb-2">
+              <p class="text-muted small mb-1">Imagen actual:</p>
+              <img src="{{ image_form.instance.image.url }}" class="img-thumbnail border border-light" style="max-width: 150px; height: auto;" alt="Imagen actual">
+            </div>
+          {% endif %}
+
+          <div class="form-check mb-2">
+            {{ image_form.active|add_class:"form-check-input" }}
+            {{ image_form.active.label_tag }}
+            {% if image_form.active.errors %}
+              <div class="invalid-feedback d-block">
+                {{ image_form.active.errors|striptags }}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="form-check mt-2">
+            {{ image_form.DELETE }}
+            <label class="form-check-label ms-1">Eliminar esta imagen</label>
+          </div>
+        </div>
+      {% endfor %}
+
+      <div class="mt-4 d-flex gap-2">
+        <button type="submit" class="btn btn-success">
+          <i class="bi bi-save"></i> Guardar cambios
+        </button>
+        <a href="{{ object.get_absolute_url }}" class="btn btn-outline-light">
+          <i class="bi bi-x-circle"></i> Cancelar
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

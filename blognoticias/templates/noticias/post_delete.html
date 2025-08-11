@@ -1,0 +1,49 @@
+{% extends "base_layout.html" %}
+{% block title %}Eliminar publicación{% endblock %}
+
+{% block contenido %}
+<div class="d-flex justify-content-center align-items-center" style="min-height: 75vh;">
+  <div class="card bg-dark text-light shadow-lg p-4 rounded-4" style="width: 100%; max-width: 600px;">
+    
+    <h4 class="text-danger text-center mb-4"><i class="bi bi-trash3-fill"></i> ¿Eliminar publicación?</h4>
+
+    <div class="alert alert-warning text-dark">
+      <p>¿Estás seguro de que querés eliminar <strong>{{ object.titulo }}</strong>?</p>
+      <p class="text-muted">Esta acción no se puede deshacer.</p>
+    </div>
+
+    {% if object.imagen_destacada %}
+      <div class="mb-3 text-center">
+        <img src="{{ object.imagen_destacada.url }}" class="img-thumbnail border border-light" style="max-width: 200px;" alt="Imagen destacada">
+      </div>
+    {% endif %}
+
+    <form method="post" class="d-grid gap-3">
+      {% csrf_token %}
+
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="confirmDelete" name="confirm_delete">
+        <label class="form-check-label" for="confirmDelete">
+          Confirmo que deseo eliminar esta publicación.
+        </label>
+      </div>
+
+      <button type="submit" class="btn btn-danger" id="deleteBtn" disabled>
+        <i class="bi bi-check-circle-fill"></i> Eliminar
+      </button>
+      <a href="{{ object.get_absolute_url }}" class="btn btn-outline-light">
+        <i class="bi bi-x-circle"></i> Cancelar
+      </a>
+    </form>
+  </div>
+</div>
+
+<script>
+  const checkbox = document.getElementById('confirmDelete');
+  const deleteBtn = document.getElementById('deleteBtn');
+
+  checkbox.addEventListener('change', function () {
+    deleteBtn.disabled = !this.checked;
+  });
+</script>
+{% endblock %}

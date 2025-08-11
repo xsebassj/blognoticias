@@ -1,0 +1,37 @@
+{% extends 'base_layout.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Editar comentario{% endblock %}
+
+{% block contenido %}
+<div class="d-flex justify-content-center align-items-center" style="min-height: 70vh;">
+  <div class="card bg-dark text-light shadow-lg p-4 rounded-4" style="width: 100%; max-width: 600px;">
+    
+    <h4 class="text-warning text-center mb-4"><i class="bi bi-pencil-square"></i> Editar comentario</h4>
+
+    {% if form.errors %}
+      <div class="alert alert-danger">
+        <ul class="mb-0">
+          {% for field in form %}
+            {% for error in field.errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="mb-3">
+        {{ form.contenido.label_tag }}
+        {{ form.contenido|add_class:"form-control bg-dark text-light border-light" }}
+
+      </div>
+      <button type="submit" class="btn btn-success w-100">
+        <i class="bi bi-save"></i> Guardar cambios
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

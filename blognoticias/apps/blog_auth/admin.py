@@ -31,3 +31,6 @@ class CustomUser(UserAdmin):
         remove_from_admins,
     ]
 admin.site.register(User,CustomUser)
+admin.site.site_header = "Panel Punto Tecnológico"
+admin.site.site_title = "Administración"
+admin.site.index_title = "Gestión de contenidos"

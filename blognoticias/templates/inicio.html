@@ -1,0 +1,52 @@
+{% extends "base_layout.html" %}
+{% block title %}Inicio{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid bg-dark text-light py-5">
+  <div class="text-center mb-5">
+    <h1 class="display-5 fw-bold text-warning">📰 BlogNoticias</h1>
+    <p class="lead text-light">Contenido profesional en un entorno visualmente potente.</p>
+    <hr class="w-25 mx-auto border-warning">
+  </div>
+
+  {% if posts %}
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+          {% for post in posts %}
+            <div class="card mb-4 bg-secondary text-light border-0 rounded-3 shadow-sm">
+              <div class="row g-0">
+                {% if post.images.first %}
+                  <div class="col-md-4">
+                    <img src="{{ post.images.first.image.url }}" class="img-fluid rounded-start h-100 object-fit-cover" alt="Imagen de {{ post.titulo }}">
+                  </div>
+                {% else %}
+                  <div class="col-md-4 bg-dark d-flex align-items-center justify-content-center text-muted">
+                    <span>Sin imagen</span>
+                  </div>
+                {% endif %}
+                <div class="col-md-8">
+                  <div class="card-body py-3">
+                    <h5 class="card-title text-warning">{{ post.titulo }}</h5>
+                    <p class="card-text text-light small">{{ post.contenido|truncatewords:20 }}</p>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                      <a href="{% url 'noticias:post_detail' post.slug %}" class="btn btn-sm btn-outline-light">
+                        <i class="bi bi-eye"></i> Leer más
+                      </a>
+                      <small class="text-light">
+                        🗂 {{ post.category.titulo }} &nbsp;|&nbsp; 🕒 {{ post.created_at|date:"d M Y" }}
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="alert alert-warning text-center">No hay publicaciones aún.</div>
+  {% endif %}
+</div>
+{% endblock %}

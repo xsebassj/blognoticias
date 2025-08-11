@@ -41,7 +41,10 @@ INSTALLED_APPS = [
     'apps.noticias',
     'apps.blog_auth',
     'tailwind',
-    'theme'
+    'theme',
+    'widget_tweaks',
+    'admin_interface',
+    'colorfield',
     
 ]
 
@@ -99,6 +102,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 AUTH_USER_MODEL = 'blog_auth.User'
+DEFAULT_POST_IMAGE = '/blognoticias/media/noticias/default/post_default.png'
+DEFAULT_POST_IMAGE_PATH = BASE_DIR / 'media/noticias/default/post_default.png'
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/

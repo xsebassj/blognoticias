@@ -1,0 +1,67 @@
+{% extends "base_layout.html" %}
+{% load widget_tweaks %}
+{% block title %}Editar perfil{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid px-3">
+  <div class="card bg-dark text-light border-0 shadow-lg rounded-4 mt-4">
+    <div class="card-body">
+      <h2 class="text-warning mb-4"><i class="bi bi-person-circle"></i> Editar perfil</h2>
+
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="mb-4">
+          <label for="id_username" class="form-label text-warning">Nombre de usuario</label>
+          {{ form.username }}
+        </div>
+
+        <div class="mb-4">
+          <label for="id_avatar" class="form-label text-warning">Foto de perfil</label>
+          {{ form.avatar }}
+
+          <div class="mt-3 d-flex flex-column align-items-start gap-2">
+            {% if request.user.avatar %}
+              <div>
+                <p class="text-muted small mb-1">Foto actual:</p>
+                <img src="{{ request.user.avatar.url }}" alt="Foto actual" class="img-thumbnail border border-light" style="max-width: 150px;">
+              </div>
+            {% endif %}
+
+            <div id="preview" class="d-none">
+              <p class="text-muted small mb-1">Nueva imagen seleccionada:</p>
+              <img id="preview-img" class="img-thumbnail border border-light" style="max-width: 150px;">
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-success w-100">
+          <i class="bi bi-save"></i> Guardar cambios
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Script para mostrar preview dinámico -->
+<script>
+  const avatarInput = document.getElementById('id_avatar');
+  const previewContainer = document.getElementById('preview');
+  const previewImg = document.getElementById('preview-img');
+
+  avatarInput.addEventListener('change', () => {
+    const file = avatarInput.files[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        previewImg.src = e.target.result;
+        previewContainer.classList.remove('d-none');
+      };
+      reader.readAsDataURL(file);
+    } else {
+      previewContainer.classList.add('d-none');
+      previewImg.src = '';
+    }
+  });
+</script>
+{% endblock %}

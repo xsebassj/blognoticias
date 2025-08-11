@@ -1,17 +1,43 @@
-{% extends 'layouts/auth_layout.html' %}
+{% extends 'base_layout.html' %}
+{% load static %}
 
-{% block title %} Iniciar sesión {% endblock title %}
+{% block title %}Iniciar sesión{% endblock %}
 
-{% block content %}
-<section class="">
-  <h1 class="">Iniciar sesión</h1>
-
-  <form method="POST" class="">
-    {% csrf_token %}
+{% block contenido %}
+<div class="d-flex justify-content-center align-items-center" style="min-height: 75vh;">
+  <div class="card bg-dark text-light shadow-lg p-4 rounded-4" style="width: 100%; max-width: 400px;">
     
-    {{ form.as_p }}
-      
-    <button type="submit" class="bg-">Iniciar sesión</button>
-  </form>
-</section>
-{% endblock content %}
+    <div class="text-center mb-3">
+      <img src="{% static 'assets/pt.png' %}" alt="Logo decorativo" class="rounded-circle border border-warning shadow" style="width: 80px; height: 80px; object-fit: cover;">
+    </div>
+
+    <h4 class="text-warning text-center mb-4"><i class="bi bi-person-circle"></i> Iniciar sesión</h4>
+
+    {% if error %}
+      <div class="alert alert-danger text-center" role="alert">
+        {{ error }}
+      </div>
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label for="username" class="form-label text-warning">Usuario</label>
+        <input type="text" class="form-control bg-dark text-light border-light" id="username" name="username" required>
+      </div>
+      <div class="mb-3">
+        <label for="password" class="form-label text-warning">Contraseña</label>
+        <input type="password" class="form-control bg-dark text-light border-light" id="password" name="password" required>
+      </div>
+      <button type="submit" class="btn btn-success w-100">
+        <i class="bi bi-box-arrow-in-right"></i> Entrar
+      </button>
+    </form>
+
+    <div class="mt-4 text-center">
+      <p class="mb-2 text-muted">¿No tienes cuenta?</p>
+      <a href="http://127.0.0.1:8000/register/" class="btn btn-outline-warning">Regístrate acá</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
