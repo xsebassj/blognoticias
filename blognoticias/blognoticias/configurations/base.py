@@ -29,8 +29,7 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'default')
 from decouple import config,Csv
 
 SECRET_KEY = config('DJANGO_SECRET_KEY')
-DEBUG = config('DJANGO_DEBUG', cast=bool)
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
+
 
 
 
