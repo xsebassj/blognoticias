@@ -34,7 +34,7 @@
 
   {% if request.user.is_authenticated %}
     <div class="mb-4 text-end">
-      <a href="http://127.0.0.1:8000/create/" class="btn btn-success btn-sm text-dark">
+      <a href="{% url 'noticias:create' %}"class="btn btn-success btn-sm text-dark">
         <i class="bi bi-plus-circle"></i> Crear nueva publicación
       </a>
     </div>

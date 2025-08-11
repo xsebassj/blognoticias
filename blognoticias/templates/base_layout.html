@@ -104,7 +104,7 @@
               <a class="nav-link {% if request.path == '/inicio/' %}active{% endif %}" href="{% url 'inicio' %}">Inicio</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link {% if 'posts' in request.path %}active{% endif %}" href="/posts/">Publicaciones</a>
+              <a class="nav-link {% if 'posts' in request.path %}active{% endif %}" href="{% url 'noticias:post' %}">Publicaciones</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="/about/">About Me</a>
@@ -116,7 +116,7 @@
 
             {% if not request.user.is_authenticated %}
               <li class="nav-item ms-3">
-                <a class="nav-link {% if request.path == '/login/' %}active{% endif %}" href="/login/">Login</a>
+                <a class="nav-link {% if request.path == '/login/' %}active{% endif %}" href="{% url 'blog_auth:login' %}">Login</a>
               </li>
             {% else %}
               <li class="nav-item dropdown ms-3">

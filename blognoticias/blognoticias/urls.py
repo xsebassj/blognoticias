@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include
-from .views import inicio_view
+from .views import inicio_view,home 
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -24,9 +24,9 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('inicio/', inicio_view , name= 'inicio'),
-    path('', include('apps.noticias.urls'), name='noticias'),
+    path('', include('apps.noticias.urls', ' noticias'), name='noticias'),
     path('', include('apps.blog_auth.urls', 'blog_auth'), name='blog_auth'),
-     path('', views.home, name='home'),
+     path('', home, name='home'),
 
 ]
 
