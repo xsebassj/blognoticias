@@ -1,1 +1,1 @@
-from configurations.production import *
+from blognoticias.configurations.production import *
