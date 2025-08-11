@@ -2,16 +2,22 @@ from .base import *
 DEBUG = False
 
 ALLOWED_HOSTS = ['xsebasssj.pythonanywhere.com']
+from decouple import config
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'blognoticias_db',
-        'USER': 'sebas',
-        'PASSWORD': 'sebas2704',
-        'HOST': 'xsebasssj.mysql.pythonanywhere-services.com',
-        'PORT': '3306',
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST'),
+        'PORT': config('DB_PORT', default='3306'),
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
     }
 }
+
 
 
 STATIC_URL = '/static/'
