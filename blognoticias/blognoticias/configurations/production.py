@@ -1,7 +1,11 @@
 from .base import * 
 
-DEBUG = os.getenv('DJANGO_DEBUG')
+DEBUG = False
 
-ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS')
-
-DATABASES = os.getenv('DJANGO_DATABASE')
+ALLOWED_HOSTS = ['xsebasssj.pythonanywhere.com']
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
