@@ -26,7 +26,7 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'default')
 # SECURITY WARNING: don't run with debug turned on in production!
 
 
-from decouple import config,Csv
+
 
 SECRET_KEY = config('DJANGO_SECRET_KEY')
 
