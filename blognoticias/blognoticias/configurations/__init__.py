@@ -1,1 +1,1 @@
-from .production import *
+from configurations.production import *
