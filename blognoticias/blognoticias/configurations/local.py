@@ -1,6 +1,6 @@
 from .base import * 
 from decouple import config,Csv
-DEBUG = config('DJANGO_DEBUG', cast=bool)
+DEBUG = True
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
 
 DATABASES = os.getenv('DJANGO_DATABASE')
