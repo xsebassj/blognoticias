@@ -1,5 +1,6 @@
 {% extends 'base_layout.html' %}
 {% load static %}
+{% load widget_tweaks %}
 
 {% block title %}Registro{% endblock %}
 
@@ -13,30 +14,26 @@
 
     <h4 class="text-warning text-center mb-4"><i class="bi bi-person-plus-fill"></i> Crear cuenta</h4>
 
-    {% if error %}
-      <div class="alert alert-danger text-center" role="alert">
-        {{ error }}
+    {% if form.errors %}
+      <div class="alert alert-danger">
+        <ul class="mb-0">
+          {% for field in form %}
+            {% for error in field.errors %}
+              <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+            {% endfor %}
+          {% endfor %}
+        </ul>
       </div>
     {% endif %}
 
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
       {% csrf_token %}
-      <div class="mb-3">
-        <label for="username" class="form-label text-warning">Usuario</label>
-        <input type="text" class="form-control bg-dark text-light border-light" id="username" name="username" required>
-      </div>
-      <div class="mb-3">
-        <label for="email" class="form-label text-warning">Email</label>
-        <input type="email" class="form-control bg-dark text-light border-light" id="email" name="email" required>
-      </div>
-      <div class="mb-3">
-        <label for="password1" class="form-label text-warning">Contraseña</label>
-        <input type="password" class="form-control bg-dark text-light border-light" id="password1" name="password1" required>
-      </div>
-      <div class="mb-3">
-        <label for="password2" class="form-label text-warning">Confirmar contraseña</label>
-        <input type="password" class="form-control bg-dark text-light border-light" id="password2" name="password2" required>
-      </div>
+      {% for field in form %}
+        <div class="mb-3">
+          <label class="form-label text-warning" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {% render_field field class="form-control bg-dark text-light border-light" %}
+        </div>
+      {% endfor %}
       <button type="submit" class="btn btn-success w-100">
         <i class="bi bi-person-check-fill"></i> Registrarse
       </button>
@@ -48,4 +45,3 @@
     </div>
   </div>
 </div>
-{% endblock %}
