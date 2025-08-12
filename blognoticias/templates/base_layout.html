@@ -104,10 +104,11 @@
               <a class="nav-link {% if request.path == '/inicio/' %}active{% endif %}" href="{% url 'inicio' %}">Inicio</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link {% if 'posts' in request.path %}active{% endif %}" href="{% url 'noticias:post' %}">Publicaciones</a>
+              <a class="nav-link {% if 'posts' in request.path %}active{% endif %}" href="{% url 'noticias:posts' %}">Publicaciones</a>
+
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/about/">About Me</a>
+              <a class="nav-link" href="{% url 'blog_auth:about_site' %}">About Me</a>
             </li>
             <form class="d-flex ms-3" role="search" method="get" action="{% url 'noticias:search' %}">
               <input class="form-control me-2 bg-dark text-light border-light" type="search" name="q" placeholder="Buscar publicaciones" aria-label="Buscar">
@@ -129,7 +130,7 @@
                   <span>{{ request.user.username }}</span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
-                  <li><a class="dropdown-item" href="/perfil/">Perfil</a></li>
+                  <li><a class="dropdown-item" href="{% url 'blog_auth:perfil' %}">Perfil</a></li>
                   <li><a class="dropdown-item" href="/logout/">Cerrar sesión</a></li>
                 </ul>
               </li>

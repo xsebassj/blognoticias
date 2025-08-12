@@ -1,13 +1,13 @@
 from pathlib import Path
 import os
+from dotenv import load_dotenv
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
-
-# Seguridad
-SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key")
-DEBUG = os.getenv("DEBUG", "False") == "True"
+#AUTH_USER_MODEL = 'blog_auth.CustomUser'
+BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(os.path.join(BASE_DIR, ".env"))
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
-
+SECRET_KEY = os.getenv("SECRET_KEY")
+DEBUG = os.getenv("DEBUG") == "True"
 # Aplicaciones
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -42,7 +42,7 @@ ROOT_URLCONF = "blognoticias.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": ["templates"],
+        'DIRS': [BASE_DIR / 'templates'],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

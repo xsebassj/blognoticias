@@ -5,9 +5,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Seguridad
-DEBUG = False
+DEBUG = os.getenv("DEBUG") == "True"
 SECRET_KEY = os.getenv('SECRET_KEY')
-ALLOWED_HOSTS = [os.getenv('ALLOWED_HOSTS')]
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+
+
 
 # Base de datos
 DATABASES = {
@@ -18,6 +20,9 @@ DATABASES = {
         'PASSWORD': os.getenv('DB_PASSWORD'),
         'HOST': os.getenv('DB_HOST'),
         'PORT': int(os.getenv('DB_PORT', '3306')),
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        }
     }
 }
 

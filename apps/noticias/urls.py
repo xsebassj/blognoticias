@@ -1,4 +1,4 @@
-from django.urls import path 
+from django.urls import path
 from .views import *
 from . import views
 app_name = 'noticias'
@@ -16,7 +16,7 @@ urlpatterns = [
     path('buscar/', PostSearchView.as_view(), name='search'),
     path('categoria/<slug:slug>/', PostPorCategoriaView.as_view(), name='categoria'),
     path('categorias/', CategoryListView.as_view(), name='categorias'),
-   
+
 
 ]
 
