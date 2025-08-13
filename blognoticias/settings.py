@@ -1,6 +1,6 @@
 import os
 
-# Elegí el entorno por variable de entorno
+
 env = os.getenv('DJANGO_ENV', 'local')
 
 if env == 'production':

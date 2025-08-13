@@ -2,7 +2,7 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
-#AUTH_USER_MODEL = 'blog_auth.CustomUser'
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
@@ -24,6 +24,30 @@ INSTALLED_APPS = [
     "admin_interface",
     "colorfield",
 ]
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'contactos.log'),  # Carpeta logs/
+            'encoding': 'utf-8',
+        },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        '': {  # Logger raíz
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
+
 
 # Middleware
 MIDDLEWARE = [
@@ -55,12 +79,10 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "blognoticias.wsgi.application"
-
-# Usuario personalizado
 AUTH_USER_MODEL = "blog_auth.User"
 
-# Imagen por defecto
-DEFAULT_POST_IMAGE = "/blognoticias/media/noticias/default/post_default.png"
+
+DEFAULT_POST_IMAGE = "media/noticias/default/post_default.png"
 DEFAULT_POST_IMAGE_PATH = BASE_DIR / "media/noticias/default/post_default.png"
 
 
@@ -75,7 +97,8 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = os.getenv("STATIC_ROOT", os.path.join(BASE_DIR, "staticfiles"))
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.getenv("MEDIA_ROOT", BASE_DIR / "media")
-
+for path in [STATIC_ROOT, MEDIA_ROOT]:
+    os.makedirs(path, exist_ok=True)
 # Validación de contraseñas
 AUTH_PASSWORD_VALIDATORS = [
     {

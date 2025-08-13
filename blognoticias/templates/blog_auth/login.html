@@ -6,7 +6,7 @@
 {% block contenido %}
 <div class="d-flex justify-content-center align-items-center" style="min-height: 75vh;">
   <div class="card bg-dark text-light shadow-lg p-4 rounded-4" style="width: 100%; max-width: 400px;">
-    
+
     <div class="text-center mb-3">
       <img src="{% static 'assets/pt.png' %}" alt="Logo decorativo" class="rounded-circle border border-warning shadow" style="width: 80px; height: 80px; object-fit: cover;">
     </div>
@@ -36,7 +36,7 @@
 
     <div class="mt-4 text-center">
       <p class="mb-2 text-muted">¿No tienes cuenta?</p>
-      <a href="{% url 'apps.blog_auth:register' %}" class="btn btn-outline-warning">Regístrate acá</a>
+      <a href="{% url 'blog_auth:register' %}" class="btn btn-outline-warning">Regístrate acá</a>
     </div>
   </div>
 </div>

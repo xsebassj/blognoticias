@@ -1,106 +1,155 @@
 {% extends 'base_layout.html' %}
+{% load widget_tweaks %}
 {% block title %}Crear publicación{% endblock %}
 
 {% block contenido %}
-<h2 class="text-warning mb-4"><i class="bi bi-pencil-square"></i> Nueva publicación</h2>
+<div class="container py-4">
+  <h2 class="text-warning mb-4"><i class="bi bi-pencil-square"></i> Nueva publicación</h2>
 
-{% if messages %}
-  <div class="container mt-3">
-    {% for message in messages %}
-      <div class="alert alert-success alert-dismissible fade show" role="alert">
-        {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
-    {% endfor %}
-  </div>
-{% endif %}
-
-<form method="post" enctype="multipart/form-data" class="bg-dark text-light p-4 rounded-3 shadow">
-  {% csrf_token %}
-
-  <div class="mb-3">
-    <label class="form-label d-block text-warning">Categoría</label>
-    <div class="d-flex flex-wrap gap-2">
-      {% for cat in category %}
-        <input type="radio" class="btn-check" name="categoria" id="cat{{ cat.id }}" value="{{ cat.id }}">
-        <label class="btn btn-outline-warning" for="cat{{ cat.id }}">{{ cat.titulo }}</label>
+  {% if messages %}
+    <div class="container mt-3">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
       {% endfor %}
     </div>
-  </div>
+  {% endif %}
 
-  {{ form.as_p }}
+  <form method="post" enctype="multipart/form-data" class="bg-dark text-light p-4 rounded-3 shadow">
+    {% csrf_token %}
 
-  <div class="mb-3">
-    <label for="images" class="form-label text-warning">Imágenes</label>
-    <input type="file" name="images" id="images" multiple accept="image/*" class="form-control">
-  </div>
+    <div class="mb-3">
+      <label class="form-label text-warning">Categoría</label>
+      {{ form.category|add_class:"form-select bg-dark text-light border-secondary" }}
+      {% if form.category.errors %}
+        <div class="text-danger mt-1">{{ form.category.errors }}</div>
+      {% endif %}
+    </div>
 
-  <div id="preview" class="d-flex flex-wrap gap-2 mb-3"></div>
+    <div class="mb-3">
+      <label for="id_titulo" class="form-label text-warning">Título</label>
+      {{ form.titulo|add_class:"form-control bg-dark text-light border-secondary" }}
+      {% if form.titulo.errors %}
+        <div class="text-danger mt-1">{{ form.titulo.errors }}</div>
+      {% endif %}
+    </div>
+    <div class="mb-3">
+      <label for="id_contenido" class="form-label text-warning">Contenido</label>
+      {{ form.contenido|add_class:"form-control bg-dark text-light border-secondary" }}
+      {% if form.contenido.errors %}
+        <div class="text-danger mt-1">{{ form.contenido.errors }}</div>
+      {% endif %}
+    </div>
+    <div class="form-check form-switch mb-3">
+      {{ form.allow_comments|add_class:"form-check-input" }}
+      <label class="form-check-label" for="{{ form.allow_comments.id_for_label }}">
+        Permitir comentarios
+      </label>
+      {% if form.allow_comments.errors %}
+        <div class="text-danger mt-1">{{ form.allow_comments.errors }}</div>
+      {% endif %}
+    </div>
+    <h5 class="text-warning mt-4"><i class="bi bi-images"></i> Imágenes</h5>
+    {{ image_formset.management_form }}
 
-  <button type="submit" class="btn btn-success w-100">
-    <i class="bi bi-upload"></i> Publicar
-  </button>
-</form>
+    <div id="image-forms" class="mb-4">
+      {% for image_form in image_formset %}
+        <div class="image-form mb-3 p-3 border border-secondary rounded bg-secondary bg-opacity-25">
+          {{ image_form.id }}
+
+          <div class="mb-2">
+            {{ image_form.image.label_tag }}
+            {{ image_form.image|add_class:"form-control bg-dark text-light border-secondary" }}
+
+            {% if image_form.instance.image and not "default.jpg" in image_form.instance.image.url %}
+              <img src="{{ image_form.instance.image.url }}" class="img-thumbnail mt-2 img-preview" style="max-height: 100px;">
+            {% endif %}
+
+            {% if image_form.image.errors %}
+              <div class="text-danger mt-1">{{ image_form.image.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="form-check form-switch mb-2">
+            {{ image_form.active|add_class:"form-check-input" }}
+            <label class="form-check-label" for="{{ image_form.active.id_for_label }}">
+              Mostrar esta imagen
+            </label>
+            {% if image_form.active.errors %}
+              <div class="text-danger mt-1">{{ image_form.active.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    <button type="button" id="add-image" class="btn btn-outline-warning btn-sm mb-3">
+      <i class="bi bi-plus-circle"></i> Añadir otra imagen
+    </button>
+    <button type="submit" class="btn btn-success w-100">
+      <i class="bi bi-upload"></i> Publicar
+    </button>
+  </form>
+</div>
+
 <style>
-  /* Botón de categoría activo */
-  .btn-check:checked + .btn-outline-warning,
-  .btn-outline-warning.active {
+  .form-check-input:checked {
     background-color: #ffc107;
-    color: #121212;
     border-color: #ffc107;
   }
-
-  /* Campos oscuros */
-  input[type="text"],
-  textarea,
-  select,
-  .form-control {
+  .form-check-label { color: #f8f9fa !important; margin-left: 5px; }
+  .image-form { background-color: #1a1a1a; }
+  .form-control, .form-select {
     background-color: #1e1e1e !important;
-    color: #f1f1f1 !important;
+    color: #f8f9fa !important;
     border: 1px solid #444 !important;
   }
-
-  input::placeholder,
-  textarea::placeholder {
-    color: #aaa !important;
+  .form-control:focus, .form-select:focus {
+    border-color: #ffc107 !important;
+    box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25) !important;
   }
-
-  label {
-    color: #ffc107;
-  }
+  .btn-close { background-color: #ffc107; }
 </style>
+
 <script>
-  const radios = document.querySelectorAll('input[name="categoria"]');
-  radios.forEach(radio => {
-    radio.addEventListener('change', () => {
-      radios.forEach(r => {
-        document.querySelector(`label[for="${r.id}"]`).classList.remove('active');
-      });
-      document.querySelector(`label[for="${radio.id}"]`).classList.add('active');
-    });
+  document.addEventListener('DOMContentLoaded', function () {
+    const addButton = document.getElementById('add-image');
+    const imageForms = document.getElementById('image-forms');
+    const totalForms = document.getElementById('id_images-TOTAL_FORMS');
+    let formCount = parseInt(totalForms.value);
+
+    function addNewForm() {
+      const emptyForm = document.querySelector('.image-form').cloneNode(true);
+      const regex = new RegExp(images-(\\d+), 'g');
+      emptyForm.innerHTML = emptyForm.innerHTML.replace(regex, images-${formCount});
+      emptyForm.querySelector('input[type="file"]').value = '';
+      const preview = emptyForm.querySelector('.img-preview');
+      if (preview) preview.remove();
+      imageForms.appendChild(emptyForm);
+      formCount++;
+      totalForms.value = formCount;
+    }
+    addButton.addEventListener('click', addNewForm);
   });
-</script>
 
-<script>
-  const input = document.getElementById('images');
-  const preview = document.getElementById('preview');
-
-  input.addEventListener('change', () => {
-    preview.innerHTML = '';
-    Array.from(input.files).forEach(file => {
-      if (file.type.startsWith('image/')) {
+  document.addEventListener('change', function (e) {
+    if (e.target.matches('input[type="file"][name$="image"]')) {
+      const file = e.target.files[0];
+      if (file && file.type.startsWith('image/')) {
         const reader = new FileReader();
-        reader.onload = e => {
-          const img = document.createElement('img');
-          img.src = e.target.result;
-          img.className = 'img-thumbnail border border-light';
-          img.style.maxWidth = '150px';
-          img.style.maxHeight = '150px';
-          preview.appendChild(img);
+        reader.onload = function (event) {
+          let preview = e.target.parentElement.querySelector('.img-preview');
+          if (!preview) {
+            preview = document.createElement('img');
+            preview.className = 'img-thumbnail mt-2 img-preview';
+            preview.style.maxHeight = '100px';
+            e.target.parentElement.appendChild(preview);
+          }
+          preview.src = event.target.result;
         };
         reader.readAsDataURL(file);
       }
-    });
+    }
   });
 </script>
 {% endblock %}

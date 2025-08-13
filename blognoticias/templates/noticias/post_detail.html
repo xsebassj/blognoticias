@@ -23,7 +23,7 @@
   </style>
 
   <div class="card bg-dark text-light p-4 rounded-4 shadow-sm">
-    
+
     <h2 class="mb-1 ">{{ post.titulo }}</h2>
     <p class="text-white mb-3">Publicado por <strong> 👤{{ post.autor.username }}&nbsp; | &nbsp; </strong> el 🕒 {{ post.created_at|date:"d M Y H:i" }}</p>
 
@@ -86,10 +86,11 @@
           </div>
           {% if comment.autor == request.user %}
             <div>
-              <a href="{% url 'noticias:comment_update' comment.pk %}" class="btn btn-sm btn-outline-secondary me-1">Editar</a>
-              <a href="{% url 'noticias:comment_delete' comment.pk %}" class="btn btn-sm btn-outline-danger">Borrar</a>
+                <a href="{% url 'noticias:comment_update' pk=comment.pk %}" class="btn btn-sm btn-outline-warning">Editar</a>
+                <a href="{% url 'noticias:comment_delete' pk=comment.pk %}" class="btn btn-sm btn-outline-danger">Borrar</a>
             </div>
           {% endif %}
+
         </div>
         <p class="mt-2 mb-0">{{ comment.contenido }}</p>
       </div>

@@ -117,7 +117,7 @@
 
             {% if not request.user.is_authenticated %}
               <li class="nav-item ms-3">
-                <a class="nav-link {% if request.path == '/login/' %}active{% endif %}" href="{% url 'blog_auth:login' %}">Login</a>
+                <a class="nav-link {% if request.path == '/blog_auth:login/' %}active{% endif %}" href="{% url 'blog_auth:login' %}">Login</a>
               </li>
             {% else %}
               <li class="nav-item dropdown ms-3">
@@ -131,7 +131,7 @@
                 </a>
                 <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
                   <li><a class="dropdown-item" href="{% url 'blog_auth:perfil' %}">Perfil</a></li>
-                  <li><a class="dropdown-item" href="/logout/">Cerrar sesión</a></li>
+                  <li><a class="dropdown-item" href="{% url 'blog_auth:logout' %}">Cerrar sesión</a></li>
                 </ul>
               </li>
             {% endif %}

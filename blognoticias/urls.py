@@ -19,6 +19,9 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from .views import inicio_view
+from django.contrib.staticfiles.views import serve
+from django.views.generic.base import RedirectView
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -31,3 +34,10 @@ urlpatterns = [
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+urlpatterns += [
+
+    path('favicon.ico', serve, {'path': 'assets/favicon.ico', 'document_root': settings.STATICFILES_DIRS[0]}),
+
+
+    path('favicon.ico', RedirectView.as_view(url='/static/assets/favicon.ico')),
+]

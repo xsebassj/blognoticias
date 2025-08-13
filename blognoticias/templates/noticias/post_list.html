@@ -7,7 +7,6 @@
   <h2 class="text-warning mb-3">📰 Publicaciones recientes</h2>
   <p class="text-light small mb-4">Total de publicaciones: {{ posts|length }}</p>
 
-  <!-- Filtro -->
   <form method="get" class="row g-2 mb-4">
     <div class="col-md-5">
       <select name="categoria" class="form-select bg-dark text-light border-light">
@@ -40,7 +39,6 @@
     </div>
   {% endif %}
 
-  <!-- Publicaciones -->
   <div class="row">
     {% for post in posts %}
       {% include 'noticias/post_target.html' with post=post %}
@@ -49,7 +47,6 @@
     {% endfor %}
   </div>
 
-  <!-- Paginación -->
   {% if pagination %}
     <nav aria-label="Page navigation" class="mt-4">
       <ul class="pagination justify-content-center">
