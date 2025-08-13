@@ -1,10 +1,15 @@
-from django import forms  
+from django import forms
 from apps.noticias.models import Comment, Post, PostImage,Category
 from django.forms import inlineformset_factory
+
+
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ('titulo', 'contenido', 'allow_comments')
+        fields = ['titulo', 'contenido', 'category', 'allow_comments']
+        widgets = {
+            'category': forms.Select(attrs={'class': 'form-select'}),
+        }
 
 class PostFilterForm(forms.Form):
     searche_query = forms.CharField(required=False, widget=forms.TextInput(attrs={'placeholder': 'buscar...', 'class': 'w-full p-2'}))
@@ -22,20 +27,25 @@ class PostFilterForm(forms.Form):
 class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
-
         fields = ['contenido']
-
         labels = {
-            'contenido':  'Comentario'
+            'contenido': 'Comentario'
         }
-
         widgets = {
             'contenido': forms.Textarea(
                 attrs={
-                    'rows': 3, 'placeholder': 'Escribe tu comentario...', 'class': 'p-2'
+                    'rows': 3,
+                    'placeholder': 'Escribe tu comentario...',
+                    'class': 'form-control p-2',
+                    'id': 'id_contenido',
+                    'required': True,
                 }
             )
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['contenido'].strip = True
 
 class PostCreateForm(PostForm):
     def save(self, commit=True):
@@ -44,14 +54,7 @@ class PostCreateForm(PostForm):
             post.save()
         return post
 
-class PostForm(forms.ModelForm):
-    class Meta:
-        model = Post
-        fields = ['titulo', 'contenido', 'category']
-        widgets = {
-            'category': forms.Select(attrs={'class': 'form-select'}),
-        }
-        
+
 
 class PostImageForm(forms.ModelForm):
     image = forms.ImageField(required=False)
@@ -64,6 +67,6 @@ PostImageFormSet = inlineformset_factory(
     Post,
     PostImage,
     form=PostImageForm,
-    extra=0,
+    extra=1,
     can_delete=True
 )

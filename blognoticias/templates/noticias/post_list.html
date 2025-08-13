@@ -22,7 +22,9 @@
       <select name="orden" class="form-select bg-dark text-light border-light">
         <option value="reciente" {% if request.GET.orden == "reciente" %}selected{% endif %}>Más recientes</option>
         <option value="antiguo" {% if request.GET.orden == "antiguo" %}selected{% endif %}>Más antiguos</option>
-      </select>
+        <option value="az" {% if request.GET.orden == "az" %}selected{% endif %}>Orden alfabético A→Z</option>
+        <option value="za" {% if request.GET.orden == "za" %}selected{% endif %}>Orden alfabético Z→A</option>
+     </select>
     </div>
     <div class="col-md-2 d-flex align-items-end">
       <button type="submit" class="btn btn-outline-warning w-100">Filtrar</button>

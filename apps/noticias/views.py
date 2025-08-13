@@ -8,23 +8,24 @@ from django.views.generic import (
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count, Q
 from apps.noticias.models import Post, PostImage, Comment, Like, Category
-from django.conf import settings
-from apps.noticias.forms import PostFilterForm, PostCreateForm, CommentForm, PostForm, PostImageFormSet
+from apps.noticias.forms import  CommentForm, PostForm, PostImageFormSet
 from django.urls import reverse, reverse_lazy
 from django.shortcuts import get_object_or_404, render, redirect
 from django.core.files import File
-import os, uuid
-from django.utils.text import slugify
 from django.contrib import messages
 from django.views import View
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
+class CategoryListView(ListView):
+    model = Category
+    template_name = 'noticias/post_list.html'
+    context_object_name = 'category'
 
 class PostListView(ListView):
     model = Post
     template_name = 'noticias/post_list.html'
     context_object_name = 'posts'
-    paginate_by = 10
-
+    paginate_by= 10
     def get_queryset(self):
         queryset = Post.objects.all()
 
@@ -37,6 +38,10 @@ class PostListView(ListView):
             queryset = queryset.order_by('-created_at')
         elif orden == 'antiguo':
             queryset = queryset.order_by('created_at')
+        elif orden == "az":
+            queryset = queryset.order_by("titulo")
+        elif orden == "za":
+            queryset = queryset.order_by("-titulo")
 
         return queryset
 
@@ -46,40 +51,56 @@ class PostListView(ListView):
         context['categoria_seleccionada'] = self.request.GET.get('categoria')
         return context
 
-
-class PostCreateView(CreateView):
+class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
-    form_class = PostCreateForm
+    form_class = PostForm
     template_name = "noticias/post_create.html"
-    success_url = reverse_lazy("noticias:posts")
+
+    def get_success_url(self):
+        return reverse_lazy("noticias:post_detail", kwargs={"slug": self.object.slug})
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['category'] = Category.objects.all()
+
+        if self.request.POST:
+            context["image_formset"] = PostImageFormSet(
+                self.request.POST,
+                self.request.FILES,
+                instance=getattr(self, "object", Post())
+            )
+        else:
+            context["image_formset"] = PostImageFormSet(instance=Post())
+
+        context["category"] = Category.objects.all()
         return context
 
     def form_valid(self, form):
-        form.instance.autor = self.request.user
-        post = form.save()
+        context = self.get_context_data()
+        image_formset = context["image_formset"]
 
-        images = self.request.FILES.getlist("images")
-        default_path = getattr(settings, 'DEFAULT_POST_IMAGE_PATH', None)
+        if form.is_valid() and image_formset.is_valid():
+            self.object = form.save(commit=False)
+            self.object.autor = self.request.user
+            self.object.save()
 
-        if not post.images.exists():
-            if images and any(img.size > 0 for img in images):
-                for image in images:
-                    PostImage.objects.create(post=post, image=image)
-            elif default_path and os.path.exists(str(default_path)):
-                with open(default_path, "rb") as f:
-                    default_image = File(f)
-                    PostImage.objects.create(post=post, image=default_image)
+            uploaded_images = [
+                f for f in image_formset
+                if f.cleaned_data.get('image')  # hay archivo
+                and not f.cleaned_data.get('DELETE', False)  # no está marcada para borrar
+            ]
+            if uploaded_images:
+                image_formset.instance = self.object
+                image_formset.save()
             else:
-                print("⚠ Imagen por defecto no encontrada o no definida.")
+                PostImage.objects.create(
+                    post=self.object,
+                    image='noticias/default/post_default.png',
+                    active=True
+                )
 
-        self.object = post
-        messages.success(self.request, "✅ ¡Publicación creada con éxito!")
-        return super().form_valid(form)
+            return super().form_valid(form)
 
+        return self.form_invalid(form)
 
 class PostDetailView(DetailView):
     model = Post
@@ -116,7 +137,7 @@ class PostDetailView(DetailView):
         delete_comment_id = self.request.GET.get("delete_comment")
         if delete_comment_id:
             comment = get_object_or_404(Comment, id=delete_comment_id)
-            if (
+            if user.is_authenticated and (
                 comment.autor == user
                 or (
                     comment.post.autor == user
@@ -134,43 +155,42 @@ class PostDetailView(DetailView):
         return context
 
 
-class PostUpdateView(UpdateView):
+class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
     form_class = PostForm
     template_name = "noticias/post_update.html"
+    slug_field = "slug"
+    slug_url_kwarg = "slug"
+
+    def get_success_url(self):
+        return reverse_lazy("noticias:post_detail", kwargs={"slug": self.object.slug})
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if self.request.method == "POST":
-            context['image_formset'] = PostImageFormSet(self.request.POST, self.request.FILES, instance=self.object)
+        if self.request.POST:
+            context["image_formset"] = PostImageFormSet(
+                self.request.POST,
+                self.request.FILES,
+                instance=self.object
+            )
         else:
-            context['image_formset'] = PostImageFormSet(instance=self.object)
+            context["image_formset"] = PostImageFormSet(instance=self.object)
         return context
 
     def form_valid(self, form):
-        post = form.save(commit=False)
-        nuevo_slug = slugify(post.titulo)
-
-        if post.slug != nuevo_slug:
-            post.slug = nuevo_slug
-
-        post.save()
-        self.object = post
-
-        image_formset = PostImageFormSet(self.request.POST, self.request.FILES, instance=post)
-        print("Formset válido:", image_formset.is_valid())
-        print("Errores:", image_formset.errors)
+        context = self.get_context_data(form=form)
+        image_formset = context["image_formset"]
 
         if image_formset.is_valid():
+            self.object = form.save()
             image_formset.save()
+            return super().form_valid(form)
         else:
-            context = self.get_context_data(form=form)
-            context['image_formset'] = image_formset
             return self.render_to_response(context)
 
-        messages.success(self.request, "✅ Publicación actualizada con éxito.")
-        return redirect(self.get_success_url())
-
+    def test_func(self):
+        post = self.get_object()
+        return self.request.user == post.autor or self.request.user.is_superuser
 
 class PostDeleteView(DeleteView):
     model = Post
@@ -196,42 +216,50 @@ class PostDeleteView(DeleteView):
     def get_success_url(self):
         return reverse_lazy('noticias:posts')
 
-
-class CommentCreateView(CreateView):
+class CommentCreateView(LoginRequiredMixin, CreateView):
     model = Comment
     form_class = CommentForm
-    template_name = "noticias/post_detail.html"
+    template_name = 'noticias/comment_form.html'
+    success_url = reverse_lazy('noticias:post_detail')
 
     def form_valid(self, form):
+        # Obtener post o 404
+        post = get_object_or_404(Post, slug=self.kwargs["slug"])
         form.instance.autor = self.request.user
-        form.instance.post = Post.objects.get(slug=self.kwargs["slug"])
+        form.instance.post = post
         return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy("noticias:post_detail", kwargs={"slug": self.kwargs["slug"]})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        post = get_object_or_404(Post, slug=self.kwargs["slug"])
+        context["post"] = post
+        context["comments"] = post.comments.order_by("-created_at")
+        context["add_comment_form"] = context.get("form", self.get_form())  # Usa el form actual
+        return context
+
+class CommentUpdateView(LoginRequiredMixin, UpdateView):
+    model = Comment
+    form_class = CommentForm
+    template_name = 'noticias/comment_update.html'
+
+    def get_object(self, queryset=None):
+        # Asegura que el usuario solo pueda editar su propio comentario
+        comment = get_object_or_404(Comment, pk=self.kwargs["pk"], autor=self.request.user)
+        return comment
 
     def get_success_url(self):
         return reverse_lazy("noticias:post_detail", kwargs={"slug": self.object.post.slug})
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        post = Post.objects.get(slug=self.kwargs["slug"])
+        post = self.object.post
         context["post"] = post
         context["comments"] = post.comments.order_by("-created_at")
+        context["add_comment_form"] = context.get("form", self.get_form())
         return context
-
-
-class CommentUpdateView(UpdateView):
-    model = Comment
-    fields = ['contenido']
-    template_name = 'noticias/comment_update.html'
-
-    def get_success_url(self):
-        return self.object.post.get_absolute_url()
-
-    def dispatch(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        if self.object.autor != request.user:
-            return redirect(self.object.post.get_absolute_url())
-        return super().dispatch(request, *args, **kwargs)
-
 
 class CommentDeleteView(DeleteView):
     model = Comment
@@ -255,9 +283,6 @@ class LikeView(LoginRequiredMixin, View):
         if not created:
             like.delete()
         return redirect(post.get_absolute_url())
-
-
-
 
 class PostSearchView(ListView):
     model = Post
@@ -292,33 +317,3 @@ class PostPorCategoriaView(ListView):
         context['categorias'] = Category.objects.all().order_by('name')
         return context
 
-class CategoryListView(ListView):
-    model = Category
-    template_name = 'noticias/post_list.html'
-    context_object_name = 'category'
-
-class PostListView(ListView):
-    model = Post
-    template_name = 'noticias/post_list.html'
-    context_object_name = 'posts'
-
-    def get_queryset(self):
-        queryset = Post.objects.all()
-
-        categoria_id = self.request.GET.get('categoria')
-        if categoria_id:
-            queryset = queryset.filter(category_id=categoria_id)
-
-        orden = self.request.GET.get('orden', 'reciente')
-        if orden == 'reciente':
-            queryset = queryset.order_by('-created_at')
-        elif orden == 'antiguo':
-            queryset = queryset.order_by('created_at')
-
-        return queryset
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['categorias'] = Category.objects.all()
-        context['categoria_seleccionada'] = self.request.GET.get('categoria')
-        return context

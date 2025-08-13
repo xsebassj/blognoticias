@@ -1,12 +1,12 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser,UserManager
 import uuid,os
 
 
 def get_avatar_filename(instance, filename):
     base_filename, file_extension = os.path.splitext(filename)
     new_filename = f"user_{instance.id}_avatar{file_extension}"
-    return os.path.join("usuarios/avatar/",new_filename)
+    return os.path.join("media/usuarios/avatar/",new_filename)
 
 
 # Create your models here.
@@ -17,6 +17,7 @@ class User(AbstractUser):
     avatar = models.ImageField(upload_to=get_avatar_filename, default='usuario/default/avatar_default.jpg')
     email = models.EmailField(unique=True)
 
+    objects = UserManager()
 
     def __str__(self):
       return self.username

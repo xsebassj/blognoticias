@@ -8,6 +8,7 @@ import logging
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
+
 def Register_View(request):
     if request.user.is_authenticated:
         return redirect('inicio')
@@ -20,7 +21,6 @@ def Register_View(request):
             messages.success(request, "Registro exitoso. ¡Bienvenido!")
             return redirect('inicio')
         else:
-            logger.warning(f"Errores en registro: {form.errors}")
             messages.error(request, "Por favor corrige los errores del formulario.")
     return render(request, 'blog_auth/register.html', {'form': form})
 
@@ -56,15 +56,20 @@ def logout_view(request):
 @login_required
 def perfil_view(request):
     user = request.user
-    form = PerfilForm(request.POST or None, request.FILES or None, instance=user)
+
     if request.method == 'POST':
+        form = PerfilForm(request.POST, request.FILES, instance=user)
         if form.is_valid():
             form.save()
             messages.success(request, "Perfil actualizado correctamente.")
             return redirect('blog_auth:perfil')
         else:
-            messages.error(request, "Error al actualizar el perfil.")
+            messages.error(request, "Error al actualizar el perfil. Revisa los datos.")
+    else:
+        form = PerfilForm(instance=user)
     return render(request, 'blog_auth/perfil.html', {'form': form})
+
+
 
 
 def about_site_view(request):
@@ -73,9 +78,12 @@ def about_site_view(request):
         email = request.POST.get("email", "").strip()
         mensaje = request.POST.get("mensaje", "").strip()
 
-        if nombre and email and mensaje:
+        if not nombre or not email or not mensaje:
+            messages.warning(request, "Todos los campos son obligatorios.")
+        elif "@" not in email or "." not in email:
+            messages.warning(request, "Por favor, ingresa un correo electrónico válido.")
+        else:
             logger.info(f"📨 Mensaje recibido de {nombre} ({email}): {mensaje}")
             messages.success(request, "¡Gracias por tu mensaje! Te responderemos pronto.")
-        else:
-            messages.warning(request, "Todos los campos son obligatorios.")
+            return redirect("blog_auth:about_site")
     return render(request, 'blog_auth/about.html')

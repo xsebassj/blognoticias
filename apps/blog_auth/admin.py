@@ -1,6 +1,5 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from django.contrib.auth.models import Group
 from apps.blog_auth.fuctions import *
 
 from apps.blog_auth.models import User
@@ -8,7 +7,7 @@ from apps.blog_auth.models import User
 # Register your models here.
 
 class CustomUser(UserAdmin):
-    
+
     fieldsets = UserAdmin.fieldsets + (
     (None, {'fields': [ 'avatar']}),
     )
