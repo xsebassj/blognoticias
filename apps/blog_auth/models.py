@@ -22,6 +22,19 @@ class User(AbstractUser):
     def __str__(self):
       return self.username
 
+class Mensajes(models.Model):
+    emisor = models.ForeignKey(User, on_delete=models.CASCADE, related_name="mensaje_enviado")
+    destinatario = models.ForeignKey(User, on_delete=models.CASCADE, related_name="mensaje_recibido")
+    asunto = models.CharField(max_length=255)
+    mensaje = models.TextField()
+    fecha = models.DateTimeField(auto_now_add=True)
+    leido = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["-fecha"]
+
+    def __str__(self):
+        return f"De {self.emisor} para {self.destinatario}: {self.asunto}"
 
 @property
 def is_collaborator(self):

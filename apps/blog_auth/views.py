@@ -2,8 +2,9 @@ from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .forms import RegisterForm, PerfilForm
+from .forms import RegisterForm, PerfilForm, MensajeForm
 import logging
+from .models import Mensajes
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -87,3 +88,27 @@ def about_site_view(request):
             messages.success(request, "¡Gracias por tu mensaje! Te responderemos pronto.")
             return redirect("blog_auth:about_site")
     return render(request, 'blog_auth/about.html')
+
+
+@login_required
+def Bandeja_view(request):
+    mensaje_b = Mensajes.objects.filter(destinatario=request.user).select_related("emisor")
+    return render(request, "blog_auth/bandeja.html", {"mensajes": mensaje_b})
+
+@login_required
+def Enviados_view(request):
+    mensaje_c = Mensajes.objects.filter(emisor=request.user).select_related("destinatario")
+    return render(request, "blog_auth:enviado.html",{"mensajes": mensaje_c})
+
+@login_required
+def Enviar_view(request):
+    if request.method == "POST":
+        form = MensajeForm(request.POST)
+        if form.is_valid():
+            mensaje = form.save(commit=False)
+            mensaje.emisor = request.user
+            mensaje.save()
+            return redirect("blog_auth:bandeja")
+    else:
+        form = MensajeForm()
+    return render(request, "blog_auth/enviar.html", {"form": form})

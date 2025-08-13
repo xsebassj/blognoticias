@@ -130,6 +130,8 @@
                   <span>{{ request.user.username }}</span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
+                <li><a class="dropdown-item" href="{% url 'blog_auth:bandeja' %}"><i class="bi bi-inbox"></i> Bandeja de entrada</a></li>
+                <li><a class="dropdown-item" href="{% url 'blog_auth:enviar' %}"><i class="bi bi-envelope-plus"></i> Enviar mensaje</a></li>
                   <li><a class="dropdown-item" href="{% url 'blog_auth:perfil' %}">Perfil</a></li>
                   <li><a class="dropdown-item" href="{% url 'blog_auth:logout' %}">Cerrar sesión</a></li>
                 </ul>

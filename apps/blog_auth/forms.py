@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import User
+from .models import User, Mensajes
 
 class SingUpForm(UserCreationForm):
     class Meta:
@@ -30,4 +30,14 @@ class PerfilForm(forms.ModelForm):
         widgets = {
             'username': forms.TextInput(attrs={'class': 'form-control'}),
             'avatar': forms.FileInput(attrs={'class': 'form-control'}),
+        }
+
+class MensajeForm(forms.ModelForm):
+    class Meta:
+        model = Mensajes
+        fields = ["destinatario", "asunto", "mensaje"]
+        widgets = {
+            "destinatario": forms.Select(attrs={"class": "form-select"}),
+            "asunto": forms.TextInput(attrs={"class": "form-control"}),
+            "mensaje": forms.Textarea(attrs={"class": "form-control", "rows": 4}),
         }
