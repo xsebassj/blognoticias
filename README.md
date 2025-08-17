@@ -1,4 +1,4 @@
-# blognoticias
+# Punto tecnologico
 hecho por sebastian samper
 
 #usuarios // # contraseñas
