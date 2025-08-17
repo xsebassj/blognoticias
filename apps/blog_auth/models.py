@@ -20,7 +20,9 @@ class User(AbstractUser):
     objects = UserManager()
 
     def __str__(self):
-      return self.username
+        return self.username
+
+
 
 class Mensajes(models.Model):
     emisor = models.ForeignKey(User, on_delete=models.CASCADE, related_name="mensaje_enviado")
@@ -38,10 +40,12 @@ class Mensajes(models.Model):
 
 @property
 def is_collaborator(self):
-   return self.groups.filter(name='collaborators').exists()
+    return self.groups.filter(name='collaborators').exists()
+
 @property
 def is_registered(self):
-   return self.groups.filter(name='registered').exists()
+    return self.groups.filter(name='registered').exists()
+
 @property
 def is_admin(self):
-   return self.groups.filter(name='admins').exists()
+    return self.groups.filter(name='admins').exists()

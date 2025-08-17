@@ -36,10 +36,10 @@
     {% else %}
       <p class="text-muted">Este post no tiene imágenes.</p>
     {% endif %}
+    <p class="mb-4">{{ post.contenido|linebreaksbr }}</p>
 
-    <p class="mb-4">{{ post.contenido }}</p>
-
-    {% if request.user == object.autor %}
+    <!-- CAMBIADO: Ahora incluye superusuarios -->
+    {% if request.user == object.autor or request.user.is_superuser %}
       <div class="mb-3">
         <a href="{% url 'noticias:post_update' slug=object.slug %}" class="btn btn-outline-primary me-2">
           ✏️ Editar
@@ -47,6 +47,8 @@
         <a href="{% url 'noticias:post_delete' slug=object.slug %}" class="btn btn-outline-danger">
           🗑️ Eliminar
         </a>
+        {% if request.user.is_superuser and request.user != object.autor %}
+        {% endif %}
       </div>
     {% endif %}
 
@@ -67,7 +69,7 @@
           {% endif %}
         </button>
       {% else %}
-        <a href="{% url 'login' %}" class="text-decoration-none text-primary">Iniciá sesión para dar like</a>
+        <a href="{% url 'blog_auth:login' %}" class="text-decoration-none text-primary">Iniciá sesión para dar like</a>
       {% endif %}
     </form>
     <p class="small text-light mt-1">{{ likes_count }} me gusta</p>
@@ -84,15 +86,17 @@
                 🕒 {{ comment.created_at|date:"d M Y H:i" }}
               </span>
           </div>
-          {% if comment.autor == request.user %}
+          <!-- CAMBIADO: Ahora incluye superusuarios -->
+          {% if comment.autor == request.user or request.user.is_superuser %}
             <div>
                 <a href="{% url 'noticias:comment_update' pk=comment.pk %}" class="btn btn-sm btn-outline-warning">Editar</a>
                 <a href="{% url 'noticias:comment_delete' pk=comment.pk %}" class="btn btn-sm btn-outline-danger">Borrar</a>
+                {% if request.user.is_superuser and request.user != comment.autor %}
+                {% endif %}
             </div>
           {% endif %}
-
         </div>
-        <p class="mt-2 mb-0">{{ comment.contenido }}</p>
+        <p class="mt-2 mb-0">{{ comment.contenido|linebreaksbr }}</p>
       </div>
     {% empty %}
       <p class="text-muted">No hay comentarios aún.</p>

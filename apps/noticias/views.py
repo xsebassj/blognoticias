@@ -5,7 +5,6 @@ from django.views.generic import (
     UpdateView,
     DeleteView,
 )
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count, Q
 from apps.noticias.models import Post, PostImage, Comment, Like, Category
 from apps.noticias.forms import  CommentForm, PostForm, PostImageFormSet
@@ -85,8 +84,8 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 
             uploaded_images = [
                 f for f in image_formset
-                if f.cleaned_data.get('image')  # hay archivo
-                and not f.cleaned_data.get('DELETE', False)  # no está marcada para borrar
+                if f.cleaned_data.get('image')
+                and not f.cleaned_data.get('DELETE', False)
             ]
             if uploaded_images:
                 image_formset.instance = self.object
@@ -115,42 +114,38 @@ class PostDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         post = self.object
         user = self.request.user
+
         active_images = post.images.filter(active=True)
-
-        context["active_images"] = active_images
-        context["add_comment_form"] = CommentForm()
-        context["likes_count"] = post.like_set.count()
-        context["comment_form"] = CommentForm()
-        context["has_images"] = active_images.exists()
-        context["liked_by_user"] = post.like_set.filter(autor=user).exists() if user.is_authenticated else False
-
+        context.update({
+            "active_images": active_images,
+            "has_images": active_images.exists(),
+            "add_comment_form": CommentForm(),
+            "comment_form": CommentForm(),
+            "likes_count": post.like_set.count(),
+            "liked_by_user": post.like_set.filter(autor=user).exists() if user.is_authenticated else False,
+        })
+        context["editing_comment_id"] = None
+        context["edit_comment_form"] = None
         edit_comment_id = self.request.GET.get("edit_comment")
-        if edit_comment_id:
+        if edit_comment_id and user.is_authenticated:
             comment = get_object_or_404(Comment, id=edit_comment_id)
             if comment.autor == user:
                 context["editing_comment_id"] = comment.id
                 context["edit_comment_form"] = CommentForm(instance=comment)
-            else:
-                context["editing_comment_id"] = None
-                context["edit_comment_form"] = None
 
+        context["deleting_comment_id"] = None
         delete_comment_id = self.request.GET.get("delete_comment")
-        if delete_comment_id:
+        if delete_comment_id and user.is_authenticated:
             comment = get_object_or_404(Comment, id=delete_comment_id)
-            if user.is_authenticated and (
+            can_delete = (
                 comment.autor == user
-                or (
-                    comment.post.autor == user
-                    and not comment.autor.is_admin
-                    and not comment.autor.is_superuser
-                )
+                or (comment.post.autor == user and not getattr(comment.autor, "is_admin", False) and not getattr(comment.autor, "is_superuser", False))
                 or user.is_superuser
                 or user.is_staff
-                or user.is_admin
-            ):
+                or getattr(user, "is_admin", False)
+            )
+            if can_delete:
                 context["deleting_comment_id"] = comment.id
-            else:
-                context["deleting_comment_id"] = None
 
         return context
 
@@ -209,8 +204,15 @@ class PostDeleteView(DeleteView):
 
     def dispatch(self, request, *args, **kwargs):
         self.object = self.get_object()
-        if self.object.autor != request.user:
+        can_delete = (
+            request.user.is_superuser or
+            self.object.autor == request.user
+        )
+
+        if not can_delete:
+            messages.error(request, "No tienes permisos para eliminar esta publicación.")
             return redirect(self.object.get_absolute_url())
+
         return super().dispatch(request, *args, **kwargs)
 
     def get_success_url(self):
@@ -223,7 +225,6 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy('noticias:post_detail')
 
     def form_valid(self, form):
-        # Obtener post o 404
         post = get_object_or_404(Post, slug=self.kwargs["slug"])
         form.instance.autor = self.request.user
         form.instance.post = post
@@ -237,7 +238,7 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
         post = get_object_or_404(Post, slug=self.kwargs["slug"])
         context["post"] = post
         context["comments"] = post.comments.order_by("-created_at")
-        context["add_comment_form"] = context.get("form", self.get_form())  # Usa el form actual
+        context["add_comment_form"] = context.get("form", self.get_form())
         return context
 
 class CommentUpdateView(LoginRequiredMixin, UpdateView):
@@ -245,10 +246,28 @@ class CommentUpdateView(LoginRequiredMixin, UpdateView):
     form_class = CommentForm
     template_name = 'noticias/comment_update.html'
 
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        can_edit = (
+            request.user.is_superuser or
+            self.object.autor == request.user
+        )
+
+        if not can_edit:
+            messages.error(request, "No tienes permisos para editar este comentario.")
+            return redirect(self.object.post.get_absolute_url())
+
+        return super().dispatch(request, *args, **kwargs)
+
     def get_object(self, queryset=None):
-        # Asegura que el usuario solo pueda editar su propio comentario
-        comment = get_object_or_404(Comment, pk=self.kwargs["pk"], autor=self.request.user)
+
+        pk = self.kwargs.get("pk")
+        comment = get_object_or_404(Comment, pk=pk)
         return comment
+
+    def form_valid(self, form):
+        messages.success(self.request, "✏️ El comentario fue actualizado correctamente.")
+        return super().form_valid(form)
 
     def get_success_url(self):
         return reverse_lazy("noticias:post_detail", kwargs={"slug": self.object.post.slug})
@@ -258,7 +277,10 @@ class CommentUpdateView(LoginRequiredMixin, UpdateView):
         post = self.object.post
         context["post"] = post
         context["comments"] = post.comments.order_by("-created_at")
-        context["add_comment_form"] = context.get("form", self.get_form())
+        context["is_admin_edit"] = (
+            self.request.user.is_superuser and
+            self.request.user != self.object.autor
+        )
         return context
 
 class CommentDeleteView(DeleteView):
@@ -267,8 +289,15 @@ class CommentDeleteView(DeleteView):
 
     def dispatch(self, request, *args, **kwargs):
         self.object = self.get_object()
-        if self.object.autor != request.user:
+        can_delete = (
+            request.user.is_superuser or
+            self.object.autor == request.user
+        )
+
+        if not can_delete:
+            messages.error(request, "No tienes permisos para eliminar este comentario.")
             return redirect(self.object.post.get_absolute_url())
+
         return super().dispatch(request, *args, **kwargs)
 
     def get_success_url(self):
