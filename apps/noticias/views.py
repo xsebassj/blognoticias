@@ -119,14 +119,18 @@ class PostDetailView(DetailView):
         context.update({
             "active_images": active_images,
             "has_images": active_images.exists(),
-            "add_comment_form": CommentForm(),
-            "comment_form": CommentForm(),
             "likes_count": post.like_set.count(),
             "liked_by_user": post.like_set.filter(autor=user).exists() if user.is_authenticated else False,
         })
-        context["editing_comment_id"] = None
-        context["edit_comment_form"] = None
-        edit_comment_id = self.request.GET.get("edit_comment")
+        if user.is_authenticated:
+            context["add_comment_form"] = CommentForm()
+            context["comment_form"] = CommentForm()
+        else:
+            context["add_comment_form"] = None
+            context["comment_form"] = None
+            context["editing_comment_id"] = None
+            context["edit_comment_form"] = None
+            edit_comment_id = self.request.GET.get("edit_comment")
         if edit_comment_id and user.is_authenticated:
             comment = get_object_or_404(Comment, id=edit_comment_id)
             if comment.autor == user:
