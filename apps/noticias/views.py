@@ -122,6 +122,10 @@ class PostDetailView(DetailView):
             "likes_count": post.like_set.count(),
             "liked_by_user": post.like_set.filter(autor=user).exists() if user.is_authenticated else False,
         })
+
+
+        edit_comment_id = self.request.GET.get("edit_comment")
+
         if user.is_authenticated:
             context["add_comment_form"] = CommentForm()
             context["comment_form"] = CommentForm()
@@ -130,7 +134,7 @@ class PostDetailView(DetailView):
             context["comment_form"] = None
             context["editing_comment_id"] = None
             context["edit_comment_form"] = None
-            edit_comment_id = self.request.GET.get("edit_comment")
+
         if edit_comment_id and user.is_authenticated:
             comment = get_object_or_404(Comment, id=edit_comment_id)
             if comment.autor == user:
@@ -145,7 +149,6 @@ class PostDetailView(DetailView):
                 comment.autor == user
                 or (comment.post.autor == user and not getattr(comment.autor, "is_admin", False) and not getattr(comment.autor, "is_superuser", False))
                 or user.is_superuser
-                or user.is_staff
                 or getattr(user, "is_admin", False)
             )
             if can_delete:
