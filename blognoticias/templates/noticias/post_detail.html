@@ -69,7 +69,7 @@
           {% endif %}
         </button>
       {% else %}
-        <a href="{% url 'blog_auth:login' %}" class="text-decoration-none text-primary">Iniciá sesión para dar like</a>
+        <a href="{% url 'blog_auth:login' %}" class="text-decoration-none text-primary">Iniciá sesión para dar like.</a>
       {% endif %}
     </form>
     <p class="small text-light mt-1">{{ likes_count }} me gusta</p>
@@ -96,7 +96,7 @@
   </form>
 {% else %}
   <p class="text-muted">
-    Tenés que <a href="{% url 'blog_auth:login' %}">iniciar sesión</a> para dejar un comentario.
+    Tenés que <a href="{% url 'blog_auth:login' %}">Inicia sesión para dejar un comentario.</a>
   </p>
 {% endif %}
       </div>
